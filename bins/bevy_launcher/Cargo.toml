@@ -10,7 +10,7 @@ keywords = ["bevy"]
 
 [dependencies]
 bevy = {path = "../../", version = "0.17.0-dev"}
-bevy_cli = {git = "https://github.com/TheBevyFlock/bevy_cli.git", tag = "cli-v0.1.0-alpha.1"}
+bevy_cli = {git = "https://github.com/TheBevyFlock/bevy_cli.git", branch = "main"}
 
 
 
