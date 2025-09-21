@@ -1,5 +1,5 @@
 [package]
-name = "bevy_internal"
+name = "bevy_editor_internal"
 version = "0.17.0-dev"
 edition = "2024"
 description = "An internal Bevy crate used to facilitate optional dynamic linking via the 'dynamic_linking' feature"
@@ -426,7 +426,7 @@ hotpatching = ["bevy_app/hotpatching", "bevy_ecs/hotpatching"]
 
 debug = ["bevy_utils/debug"]
 
-editor = ["dep:bevy_editor_internal", "bevy_editor_internal/editor"]
+editor = ["dep:bevy_editor_framework"]
 
 [dependencies]
 # bevy (no_std)
@@ -512,7 +512,7 @@ bevy_window = { path = "../bevy_window", optional = true, version = "0.17.0-dev"
   "bevy_reflect",
 ] }
 bevy_winit = { path = "../bevy_winit", optional = true, version = "0.17.0-dev", default-features = false }
-bevy_editor_internal = { path = "../bevy_editor_internal", optional = true, version = "0.17.0-dev" }
+bevy_editor_framework = { path = "../bevy_editor_framework", optional = true, version = "0.17.0-dev" }
 
 [target.'cfg(target_os = "android")'.dependencies]
 bevy_android = { path = "../bevy_android", version = "0.17.0-dev", default-features = false }

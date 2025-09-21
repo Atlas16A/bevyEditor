@@ -36,6 +36,9 @@ members = [
   "tools/*",
   # Bevy's error codes. This is a crate so we can automatically check all of the code blocks.
   "errors",
+
+  # Binary targets that depend on Bevy, such as the launcher.
+  "bins/bevy_launcher",
 ]
 exclude = [
   # Integration tests are not part of the workspace
@@ -586,6 +589,8 @@ hotpatching = ["bevy_internal/hotpatching"]
 
 # Enable collecting debug information about systems and components to help with diagnostics
 debug = ["bevy_internal/debug"]
+
+editor = ["bevy_internal/editor"]
 
 [dependencies]
 bevy_internal = { path = "crates/bevy_internal", version = "0.17.0-dev", default-features = false }

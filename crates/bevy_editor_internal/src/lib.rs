@@ -38,7 +38,7 @@ pub use bevy_dev_tools as dev_tools;
 pub use bevy_diagnostic as diagnostic;
 pub use bevy_ecs as ecs;
 #[cfg(feature = "editor")]
-pub use bevy_editor_internal as editor;
+pub use bevy_editor_framework as editor_framework;
 #[cfg(feature = "bevy_feathers")]
 pub use bevy_feathers as feathers;
 #[cfg(feature = "bevy_gilrs")]
