@@ -77,6 +77,10 @@ fn folder_contains_cargo_toml(folder: &Path) -> bool {
 }
 
 fn run_project_in_editor_mode(path: &Path) {
+    /// Runs the project in editor mode by executing `cargo run --release -- --editor-mode` in the specified path.
+    /// This assumes that the project is a valid Cargo project and that the main.rs file is set up to handle the `--editor-mode` argument.
+    /// This should be changed later to spawn the editor as a child process of the lancher with a IPC channel to tell the launcher of any error events that may have killed the editor.
+    /// This will allow the launcher to inform the user of any issues with the editor without having to check the terminal output.
     std::process::Command::new("cargo")
         .arg("run")
         .arg("--release")

@@ -1,6 +1,6 @@
 [package]
 name = "bevy_editor_framework"
-version = "0.17.0-dev"
+version = "0.18.0-dev"
 edition = "2024"
 description = "Provides the bevy Editor Framework"
 homepage = "https://bevy.org"
@@ -9,10 +9,10 @@ license = "MIT OR Apache-2.0"
 keywords = ["bevy"]
 
 [dependencies]
-bevy_app = {path = "../bevy_app", version = "0.17.0-dev"}
-bevy_ecs = {path = "../bevy_ecs", version = "0.17.0-dev"}
-bevy_reflect = {path = "../bevy_reflect", version = "0.17.0-dev"}
-bevy_log = {path = "../bevy_log", version = "0.17.0-dev"}
+bevy_app = {path = "../bevy_app", version = "0.18.0-dev"}
+bevy_ecs = {path = "../bevy_ecs", version = "0.18.0-dev"}
+bevy_reflect = {path = "../bevy_reflect", version = "0.18.0-dev"}
+bevy_log = {path = "../bevy_log", version = "0.18.0-dev"}
 argh = "0.1.13"
 
 [lints]

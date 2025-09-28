@@ -13,7 +13,7 @@ struct Args {
 /// While [App] is Bevy's main application type, [EditorApp] is a thin wrapper around it that
 /// conditionally adds editor or game plugins based on command line arguments.
 /// This allows the same binary to run in either editor mode or game mode, depending on
-/// the presence of the `--editor` flag.
+/// the presence of the `--editor-mode` flag.
 /// Note that when using [EditorApp], you should wrap your game into a single plugin and add it
 /// using [EditorAppExt::add_plugins]. This ensures that the game plugins are only added
 /// when not in editor mode and ensures systems you wish to register don't get registered in
