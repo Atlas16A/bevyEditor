@@ -1,117 +1,51 @@
-use std::{
-    os::unix::process::CommandExt,
-    path::{Path, PathBuf},
-};
+use std::path::PathBuf;
 
 use bevy::{
     prelude::*,
-    tasks::{
-        futures_lite::{self, future},
-        AsyncComputeTaskPool, Task,
-    },
+    tasks::{futures_lite::future, IoTaskPool, Task},
     ui_widgets::Activate,
 };
 
 use rfd::FileDialog;
-pub struct FileDialogPlugin;
 
-impl Plugin for FileDialogPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_message::<SelectedFileEvent>()
-            .add_systems(
-                Update,
-                get_file_response.run_if(any_async_threads.and(any_with_component::<SelectedFile>)),
-            )
-            .add_systems(Update, selected_file_handler);
-    }
-}
-
-#[derive(Component)]
-/// A component that holds a task for selecting a file.
-pub struct SelectedFile(Task<Option<PathBuf>>);
-
-#[derive(Message)]
-pub struct SelectedFileEvent(PathBuf);
-
-pub fn get_file_response(
-    mut commands: Commands,
-    mut tasks: Query<(Entity, &mut SelectedFile)>,
-    mut events: MessageWriter<SelectedFileEvent>,
-) {
-    for (entity, mut selected_file) in tasks.iter_mut() {
-        if let Some(result) = future::block_on(future::poll_once(&mut selected_file.0)) {
-            if result.is_none() {
-                commands.entity(entity).remove::<SelectedFile>();
-                continue;
-            }
-            info!("{:?}", result);
-            events.write(SelectedFileEvent(result.unwrap()));
-            commands.entity(entity).remove::<SelectedFile>();
+pub fn get_future<T, R>(mut commands: Commands, mut tasks: Query<(Entity, &mut T)>) -> Option<R>
+where
+    T: Component<Mutability = bevy::ecs::component::Mutable> + Unpin + Future<Output = R>,
+{
+    for (entity, mut task) in tasks.iter_mut() {
+        let mut pinned = core::pin::Pin::new(&mut *task);
+        let poll_once = future::poll_once(&mut pinned);
+        if let Some(result) = future::block_on(poll_once) {
+            commands.entity(entity).remove::<T>();
+            return Some(result);
         }
     }
+    None
+}
+
+pub trait DialogRequest {
+    fn new(task: Task<Option<PathBuf>>) -> Self;
 }
 
 /// Spawns a single file dialog future, if one is not already active.
-pub fn spawn_file_dialog(
-    _: In<Activate>,
+pub fn spawn_folder_dialog<T>(
+    entity: In<Activate>,
     mut commands: Commands,
-    active_dialogs: Query<&SelectedFile>,
-) {
+    active_dialogs: Query<&T>,
+) where
+    T: Component + DialogRequest,
+{
     if !active_dialogs.is_empty() {
         return;
     }
-    let thread_pool = AsyncComputeTaskPool::get();
+    let thread_pool = IoTaskPool::get();
 
     let task = thread_pool.spawn(async move { FileDialog::new().pick_folder() });
-    commands.spawn(SelectedFile(task));
+    commands.entity(entity.0 .0).insert(T::new(task));
 }
 
 /// Returns true if there are any threads in the async compute task pool.
-fn any_async_threads() -> bool {
-    let thread_pool = AsyncComputeTaskPool::get();
+pub fn any_async_threads() -> bool {
+    let thread_pool = IoTaskPool::get();
     thread_pool.thread_num() > 1
-}
-
-fn folder_contains_cargo_toml(folder: &Path) -> bool {
-    folder.join("Cargo.toml").exists()
-}
-
-fn run_project_in_editor_mode(path: &Path) {
-    /// Runs the project in editor mode by executing `cargo run --release -- --editor-mode` in the specified path.
-    /// This assumes that the project is a valid Cargo project and that the main.rs file is set up to handle the `--editor-mode` argument.
-    /// This should be changed later to spawn the editor as a child process of the lancher with a IPC channel to tell the launcher of any error events that may have killed the editor.
-    /// This will allow the launcher to inform the user of any issues with the editor without having to check the terminal output.
-    std::process::Command::new("cargo")
-        .arg("run")
-        .arg("--release")
-        .arg("--")
-        // Editor mode argument
-        .arg("--editor-mode")
-        .current_dir(path)
-        .process_group(0)
-        .spawn()
-        .expect("Failed to start the project in editor mode");
-}
-
-fn selected_file_handler(
-    mut events: MessageReader<SelectedFileEvent>,
-    mut app_exit_events: MessageWriter<AppExit>,
-) {
-    /// Handles the selected file event.
-    /// If the selected folder contains a Cargo.toml file, it runs the project in editor mode.
-    /// This should be changed later to open the cargo and confirm it is a bevy project with a version check to ensure it has the editor setup.
-    /// the main.rs file should also be checked to ensure it has the editor setup.
-    /// If the selected folder does not contain a Cargo.toml file, it logs an error
-    /// and does not close the launcher.
-    ///
-    /// This should also be changed to swap the launcher out with a loading screen while the editor is compiling to avoid user confusion.
-    for SelectedFileEvent(path) in events.read() {
-        if folder_contains_cargo_toml(path) {
-            info!("Selected folder: {:?}", path);
-            run_project_in_editor_mode(path);
-            app_exit_events.write(AppExit::Success);
-        } else {
-            error!("The selected folder does not contain a Cargo.toml file.");
-        }
-    }
 }
