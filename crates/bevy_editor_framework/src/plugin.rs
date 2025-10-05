@@ -1,9 +1,9 @@
-use std::any::TypeId;
-
 use bevy_app::{App, Plugin, Startup};
 use bevy_camera::Camera2d;
 use bevy_ecs::{
     reflect::AppTypeRegistry,
+    resource::{self, Resource},
+    schedule::IntoScheduleConfigs,
     system::{Commands, In, IntoSystem, Res},
 };
 use bevy_log::info;
@@ -15,13 +15,19 @@ pub struct EditorReflectionPlugin;
 
 impl Plugin for EditorReflectionPlugin {
     fn build(&self, app: &mut App) {
-        //app.add_systems(Startup, setup);
+        app.insert_resource(EditorTypesForEvaluation { types: Vec::new() });
+
         app.add_systems(
             Startup,
-            gather_editor_implementor_types
-                .pipe(editor_plugin_types.pipe(plugin_editor_evaluation)),
+            (gather_editor_implementor_types.pipe(editor_plugin_types.pipe(store_registrations)),),
         );
+        app.add_systems(Startup, plugin_editor_evaluation.after(store_registrations));
     }
+}
+
+#[derive(Resource)]
+struct EditorTypesForEvaluation {
+    types: Vec<TypeRegistration>,
 }
 
 fn reflect_default(registration: &TypeRegistration) -> Box<dyn Reflect> {
@@ -37,6 +43,7 @@ fn reflect_default(registration: &TypeRegistration) -> Box<dyn Reflect> {
 fn gather_editor_implementor_types(registry: Res<AppTypeRegistry>) -> Vec<TypeRegistration> {
     let mut types = Vec::new();
     let registry = registry.read();
+
     registry.iter().for_each(|ty| {
         if ty.data::<ReflectEditor>().is_some() && ty.data::<ReflectDefault>().is_some() {
             info!(
@@ -53,10 +60,14 @@ fn gather_editor_implementor_types(registry: Res<AppTypeRegistry>) -> Vec<TypeRe
 /// It relies on the fact that ending with "Plugin" is a convention for naming plugins
 ///
 /// It should be replaced with a more robust way to check if the type implements the Plugin trait
-/* if ty.data::<ReflectPlugin>().is_none() {
-    info!("Type: {typeinfo:?} - No ReflectPlugin");
-    return;
-} */
+///
+/// ```
+/// let typeinfo = ty.type_info().ty().path();
+/// if ty.data::<ReflectPlugin>().is_none() {
+///    info!("Type: {typeinfo:?} - No ReflectPlugin");
+///    return;
+/// }
+/// ```
 fn editor_plugin_types(In(types): In<Vec<TypeRegistration>>) -> Vec<TypeRegistration> {
     types
         .into_iter()
@@ -64,12 +75,12 @@ fn editor_plugin_types(In(types): In<Vec<TypeRegistration>>) -> Vec<TypeRegistra
         .collect()
 }
 
-fn plugin_editor_evaluation(In(types): In<Vec<TypeRegistration>>, mut commands: Commands) {
-    for ty in types {
+fn plugin_editor_evaluation(resource: Res<EditorTypesForEvaluation>, mut commands: Commands) {
+    for ty in resource.types.iter() {
         let typeinfo = ty.type_info().ty().path();
         info!("Editor Plugin Type: {typeinfo:?}");
 
-        let value = reflect_default(&ty);
+        let value = reflect_default(ty);
 
         let reflect_editor = ty
             .data::<ReflectEditor>()
@@ -83,12 +94,18 @@ fn plugin_editor_evaluation(In(types): In<Vec<TypeRegistration>>, mut commands: 
 
         commands.spawn(Camera2d);
 
-        editor_implementor.ui_target().map_or((), |targets| {
-            targets.iter().for_each(|target| {
-                info!(" - UI Target: {target:?}");
+        let _ = editor_implementor
+            .ui_target()
+            .unwrap()
+            .into_iter()
+            .map(|targets| {
+                info!(" - UI Target: {targets:?}");
             });
-        });
 
         editor_implementor.add_ui(&mut commands);
     }
+}
+
+fn store_registrations(In(types): In<Vec<TypeRegistration>>, mut commands: Commands) {
+    commands.insert_resource(EditorTypesForEvaluation { types });
 }
