@@ -57,11 +57,11 @@ fn main() {
 fn setup(mut commands: Commands) {
     // ui camera
     commands.spawn(Camera2d);
-    let root = base_ui(&mut commands);
+    let root = base_ui();
     commands.spawn(root);
 }
 
-fn base_ui(commands: &mut Commands) -> impl Bundle {
+fn base_ui() -> impl Bundle {
     (
         Node {
             width: Val::Percent(100.0),
@@ -80,7 +80,7 @@ fn base_ui(commands: &mut Commands) -> impl Bundle {
                 button(
                     ButtonProps::default(),
                     (),
-                    Spawn((Text::new("Normal"), ThemedText))
+                    Spawn((Text::new("Open Project"), ThemedText))
                 ),
                 observe(spawn_folder_dialog::<OpenProjectFileDialog>)
             ),]
