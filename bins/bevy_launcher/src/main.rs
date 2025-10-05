@@ -8,7 +8,7 @@ use bevy::feathers::dark_theme::create_dark_theme;
 use bevy::feathers::theme::{ThemedText, UiTheme};
 use bevy::feathers::FeathersPlugins;
 use bevy::tasks::Task;
-use bevy::ui_widgets::Callback;
+use bevy::ui_widgets::{observe, Activate};
 use bevy::{prelude::*, window::WindowResolution};
 use bevy_cli::commands::{
     build::{build, BuildArgs, BuildSubcommands, BuildWebArgs},
@@ -76,19 +76,19 @@ fn base_ui(commands: &mut Commands) -> impl Bundle {
                 flex_direction: FlexDirection::Column,
                 ..default()
             },
-            children![button(
-                ButtonProps {
-                    on_click: Callback::System(
-                        commands.register_system(spawn_folder_dialog::<OpenProjectFileDialog>)
-                    ),
-                    ..default()
-                },
-                (),
-                Spawn((Text::new("Open Project"), ThemedText))
-            ),],
+            children![(
+                button(
+                    ButtonProps::default(),
+                    (),
+                    Spawn((Text::new("Normal"), ThemedText))
+                ),
+                observe(spawn_folder_dialog::<OpenProjectFileDialog>)
+            ),]
         ),],
     )
 }
+
+//spawn_folder_dialog::<OpenProjectFileDialog>
 #[derive(Component)]
 struct OpenProjectFileDialog(Task<Option<PathBuf>>);
 

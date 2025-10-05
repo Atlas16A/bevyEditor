@@ -29,7 +29,7 @@ pub trait DialogRequest {
 
 /// Spawns a single file dialog future, if one is not already active.
 pub fn spawn_folder_dialog<T>(
-    entity: In<Activate>,
+    entity: On<Activate>,
     mut commands: Commands,
     active_dialogs: Query<&T>,
 ) where
@@ -41,7 +41,7 @@ pub fn spawn_folder_dialog<T>(
     let thread_pool = IoTaskPool::get();
 
     let task = thread_pool.spawn(async move { FileDialog::new().pick_folder() });
-    commands.entity(entity.0 .0).insert(T::new(task));
+    commands.entity(entity.entity).insert(T::new(task));
 }
 
 /// Returns true if there are any threads in the async compute task pool.
