@@ -1,4 +1,4 @@
-#![cfg_attr(docsrs, feature(doc_cfg))]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
 #![doc(
     html_logo_url = "https://bevy.org/assets/icon.png",
@@ -38,7 +38,7 @@ pub use bevy_dev_tools as dev_tools;
 pub use bevy_diagnostic as diagnostic;
 pub use bevy_ecs as ecs;
 #[cfg(feature = "editor")]
-pub use bevy_editor_internal as editor;
+pub use bevy_editor_framework as editor_framework;
 #[cfg(feature = "bevy_feathers")]
 pub use bevy_feathers as feathers;
 #[cfg(feature = "bevy_gilrs")]
@@ -74,8 +74,6 @@ pub use bevy_remote as remote;
 pub use bevy_render as render;
 #[cfg(feature = "bevy_scene")]
 pub use bevy_scene as scene;
-#[cfg(feature = "bevy_scene2")]
-pub use bevy_scene2 as scene2;
 #[cfg(feature = "bevy_shader")]
 pub use bevy_shader as shader;
 #[cfg(feature = "bevy_solari")]

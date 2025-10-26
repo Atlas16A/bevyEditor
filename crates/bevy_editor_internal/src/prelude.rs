@@ -2,7 +2,7 @@
 pub use crate::{
     app::prelude::*, ecs::prelude::*, input::prelude::*, math::prelude::*, platform::prelude::*,
     reflect::prelude::*, time::prelude::*, transform::prelude::*, utils::prelude::*,
-    DefaultPlugins, MinimalPlugins,
+    DefaultEditorPlugins, MinimalPlugins,
 };
 
 #[doc(hidden)]
@@ -105,4 +105,4 @@ pub use crate::picking::prelude::*;
 
 #[doc(hidden)]
 #[cfg(feature = "editor")]
-pub use crate::editor::prelude::*;
+pub use crate::editor_framework::prelude::*;

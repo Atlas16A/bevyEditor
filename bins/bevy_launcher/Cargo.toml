@@ -1,0 +1,17 @@
+[package]
+name = "bevy_launcher"
+version = "0.17.1"
+edition = "2024"
+description = "Provides the bevy Launcher"
+homepage = "https://bevy.org"
+repository = "https://github.com/bevyengine/bevy"
+license = "MIT OR Apache-2.0"
+keywords = ["bevy"]
+
+[dependencies]
+bevy = {path = "../../", version = "0.17.1", features = ["experimental_bevy_feathers"] }
+bevy_cli = {git = "https://github.com/TheBevyFlock/bevy_cli.git", tag = "cli-v0.1.0-alpha.2"}
+rfd = "0.15.4"
+
+[lints]
+workspace = true
