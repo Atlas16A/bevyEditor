@@ -42,6 +42,8 @@ members = [
   "tools/*",
   # Bevy's error codes. This is a crate so we can automatically check all of the code blocks.
   "errors",
+  # Binaries that are distributed by Bevy, such as the Bevy Launcher.
+  "bins/*",
 ]
 exclude = [
   # Integration tests are not part of the workspace
@@ -5471,3 +5473,8 @@ name = "Light Probe Blending"
 description = "Demonstrates blending between multiple reflection probes"
 category = "3D Rendering"
 wasm = false
+
+
+[[bin]]
+name = "bevy_launcher"
+path = "bins/bevy_launcher/src/main.rs"
