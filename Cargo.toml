@@ -5505,3 +5505,4 @@ wasm = false
 [[bin]]
 name = "bevy_launcher"
 path = "bins/bevy_launcher/src/main.rs"
+required-features = ["experimental_bevy_feathers"]
