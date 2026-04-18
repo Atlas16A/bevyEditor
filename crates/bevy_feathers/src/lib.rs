@@ -26,6 +26,8 @@
 //! Please report issues, submit fixes and propose changes.
 //! Thanks for stress-testing; let's build something better together.
 
+extern crate alloc;
+
 use bevy_app::{
     HierarchyPropagatePlugin, Plugin, PluginGroup, PluginGroupBuilder, PostUpdate, PropagateSet,
 };
@@ -45,9 +47,11 @@ use crate::{
 
 mod alpha_pattern;
 pub mod constants;
+pub mod containers;
 pub mod controls;
 pub mod cursor;
 pub mod dark_theme;
+pub mod display;
 pub mod focus;
 pub mod font_styles;
 pub mod palette;
@@ -68,6 +72,11 @@ impl Plugin for FeathersCorePlugin {
         embedded_asset!(app, "assets/fonts/FiraSans-Regular.ttf");
         embedded_asset!(app, "assets/fonts/FiraSans-Italic.ttf");
         embedded_asset!(app, "assets/fonts/FiraMono-Medium.ttf");
+
+        // Embedded icons
+        embedded_asset!(app, "assets/icons/chevron-down.png");
+        embedded_asset!(app, "assets/icons/chevron-right.png");
+        embedded_asset!(app, "assets/icons/x.png");
 
         // Embedded shader
         embedded_asset!(app, "assets/shaders/alpha_pattern.wgsl");
