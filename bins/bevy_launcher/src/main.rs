@@ -1,30 +1,15 @@
 //! A simple launcher for Bevy applications. 
 //! This is intended to be a standalone binary that can be distributed for the purpose of creating/managing Bevy projects.
+
 use bevy::{
     feathers::{
-        constants::{fonts, icons},
-        containers::{
+        FeathersPlugins, constants::{fonts::{MONO, REGULAR}, icons, size::{MEDIUM_FONT, ROW_HEIGHT, SMALL_FONT}}, containers::{
             flex_spacer, group, group_body, group_header, pane, pane_body, pane_header,
             pane_header_divider, subpane, subpane_body, subpane_header,
-        },
-        controls::{
-            button, checkbox, color_plane, color_slider, color_swatch, disclosure_toggle, menu,
-            menu_button, menu_divider, menu_item, menu_popup, radio, slider, text_input,
-            text_input_container, toggle_switch, tool_button, ButtonProps, ButtonVariant,
-            CheckboxProps, ColorChannel, ColorPlane, ColorPlaneValue, ColorSlider,
-            ColorSliderProps, ColorSwatch, ColorSwatchValue, MenuButtonProps, MenuItemProps,
-            RadioProps, SliderBaseColor, SliderProps, TextInputProps,
-        },
-        cursor::{EntityCursor, OverrideCursor},
-        dark_theme::create_dark_theme,
-        display::{icon, label, label_dim},
-        font_styles::InheritableFont,
-        rounded_corners::RoundedCorners,
-        theme::{ThemeBackgroundColor, ThemedText, UiTheme, ThemeBorderColor},
-        tokens, FeathersPlugins,
-        
-    }, 
-    prelude::*, ui_widgets::Activate,};
+        }, controls::{
+            ButtonProps, ButtonVariant, CheckboxProps, ColorChannel, ColorPlane, ColorPlaneValue, ColorSlider, ColorSliderProps, ColorSwatch, ColorSwatchValue, MenuButtonProps, MenuItemProps, RadioProps, SliderBaseColor, SliderProps, TextInputProps, button, checkbox, color_plane, color_slider, color_swatch, disclosure_toggle, menu, menu_button, menu_divider, menu_item, menu_popup, radio, slider, text_input, text_input_container, toggle_switch, tool_button
+        }, cursor::{EntityCursor, OverrideCursor}, dark_theme::create_dark_theme, display::{icon, label, label_dim}, font_styles::InheritableFont, palette::GRAY_1, rounded_corners::RoundedCorners, theme::{ThemeBackgroundColor, ThemeBorderColor, ThemeFontColor, ThemedText, UiTheme}, tokens
+    }, prelude::*, scene::prelude::Scene, ui_widgets::Activate};
 
 
 /// The internal Bevy Launcher plugin.
@@ -61,30 +46,67 @@ fn launcher_root() -> impl Scene {
             width: percent(100),
             height: percent(100),
             display: Display::Flex,
-            flex_direction: FlexDirection::Row,
+            flex_direction: FlexDirection::Column,
+            padding: UiRect::all(Val::Px(4.0)),
+            row_gap: Val::Px(4.0),
             
         }
         ThemeBackgroundColor(tokens::WINDOW_BG)
-        :pane 
+        Children [
+            (:pane 
             Node {
-                padding: UiRect::all(Val::Px(4.0)),
+                height: percent(100),
+                width: percent(100),
             }
             Children [
-                :pane_header Children [
-                    button(
-                        ButtonProps {
-                            caption: Box::new(bsn_list!(
-                                (Text("Normal") ThemedText),
-                            )),
-                            ..default()
-                        })
-                        Node {
-                            flex_grow: 1.0,
-                        }
-                        on(|_activate: On<Activate>| {
-                            info!("Normal button clicked!");
-                        }
-                    )
+                :pane_header 
+                Node {
+                    padding: UiRect {
+                        left: Val::Px(6.0),
+                        top: Val::Px(0.0),
+                        right: Val::Px(6.0),
+                        bottom: Val::Px(0.0),
+                    },
+                    justify_content: JustifyContent::Start,
+                    column_gap: Val::Px(0.0),
+                }
+                Children [
+                   (:fake_pane_tab(ButtonProps {
+                    caption: Box::new(bsn_list!(
+                        (Text("Projects") ThemedText),
+                    )),
+                    ..default()
+                   })),
+                   (:inactive_tab(ButtonProps {
+                       caption: Box::new(bsn_list!(
+                           (Text("Templates") ThemedText),
+                       )),
+                       ..default()
+                   })),
+                   (:inactive_tab(ButtonProps {
+                       caption: Box::new(bsn_list!(
+                           (Text("Installs") ThemedText),
+                       )),
+                       ..default()
+                   })),
+                   (:inactive_tab(ButtonProps {
+                       caption: Box::new(bsn_list!(
+                           (Text("Assets") ThemedText),
+                       )),
+                       ..default()
+                   })),
+                   (:inactive_tab(ButtonProps {
+                       caption: Box::new(bsn_list!(
+                           (Text("Learn") ThemedText),
+                       )),
+                       ..default()
+                   })),
+                   (:inactive_tab(ButtonProps {
+                       caption: Box::new(bsn_list!(
+                           (Text("Community") ThemedText),
+                       )),
+                       ..default()
+                   })),
                 ],
                 (
                     :pane_body 
@@ -105,6 +127,81 @@ fn launcher_root() -> impl Scene {
                         
                         ]
                 )
-            ]
+            ]),
+            // Bottom bar under the content pane, Intended to be a thin status/footer bar
+            (
+                Node {
+                    width: Val::Percent(100.0),
+                    height: Val::Px(24.0),
+                }
+            )
+        ]
+    }
+}
+
+
+fn fake_pane_tab(props: ButtonProps) -> impl Scene {
+    bsn!{
+        Node { height: Val::Percent(100.0) }
+        Children [
+            // Spacer node before the button to create inverted border effect
+            (Node { 
+                width: Val::Px(5.0),
+                border: UiRect::all(Val::Px(0.0)), 
+                border_radius: BorderRadius::bottom_right(Val::Px(6.0))
+            }
+            OuterColor(GRAY_1)
+            ),
+            // The actual button in the tab
+            (
+                Node {
+                    height: Val::Percent(100.0),
+                    border: UiRect::top(Val::Px(2.0)),
+                    border_radius: BorderRadius::top(Val::Px(6.0)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    padding: UiRect::axes(Val::Px(8.0), Val::Px(0.)),
+                }
+                ThemeFontColor(tokens::BUTTON_TEXT)
+                InheritableFont {
+                    font: REGULAR,
+                    font_size: SMALL_FONT,
+                    weight: FontWeight::DEFAULT,
+                }
+                Children [
+                    {props.caption}
+                ]
+                ThemeBackgroundColor(tokens::PANE_BODY_BG)
+                ThemeBorderColor(tokens::SWITCH_BORDER_CHECKED)
+            ),
+            // Spacer node after the button to create inverted border effect
+            (Node { 
+                width: Val::Px(5.0),
+                border: UiRect::all(Val::Px(0.0)), 
+                border_radius: BorderRadius::bottom_left(Val::Px(6.0))
+            }
+            OuterColor(GRAY_1)
+            ),
+        ]
+    }
+}
+
+fn inactive_tab(props: ButtonProps) -> impl Scene {
+    bsn!{
+        Node { 
+            height: Val::Percent(100.0),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            padding: UiRect::axes(Val::Px(8.0), Val::Px(0.)),
+        }
+        ThemeFontColor(tokens::TEXT_DIM)
+        InheritableFont {
+            font: REGULAR,
+            font_size: SMALL_FONT,
+            weight: FontWeight::DEFAULT,
+        }
+        Children [
+            {props.caption}
+        ]
     }
 }
