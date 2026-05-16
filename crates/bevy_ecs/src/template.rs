@@ -3,8 +3,9 @@
 pub use bevy_ecs_macros::FromTemplate;
 
 use crate::{
+    component::Mutable,
     entity::Entity,
-    error::Result,
+    error::{BevyError, Result},
     resource::Resource,
     world::{EntityWorldMut, Mut, World},
 };
@@ -80,7 +81,7 @@ impl<'a, 'w> TemplateContext<'a, 'w> {
 
     /// Retrieves a mutable reference to the given resource `R`.
     #[inline]
-    pub fn resource_mut<R: Resource>(&mut self) -> Mut<'_, R> {
+    pub fn resource_mut<R: Resource<Mutability = Mutable>>(&mut self) -> Mut<'_, R> {
         self.entity.resource_mut()
     }
 }
@@ -333,7 +334,7 @@ impl ScopedEntities {
 /// ```
 pub trait FromTemplate: Sized {
     /// The [`Template`] for this type.
-    type Template: Template;
+    type Template: Template<Output = Self>;
 }
 
 macro_rules! template_impl {
@@ -402,9 +403,15 @@ impl<T: Clone + Default + Unpin> FromTemplate for T {
 pub trait SpecializeFromTemplate: Sized {}
 
 /// A [`Template`] reference to an [`Entity`].
-pub enum EntityReference {
+#[derive(Default)]
+pub enum EntityTemplate {
+    /// A reference to a specific [`Entity`]
+    Entity(Entity),
     /// A reference to an entity via a [`ScopedEntityIndex`]
     ScopedEntityIndex(ScopedEntityIndex),
+    /// An entity has not been specified. Building a template with this variant will result in an error.
+    #[default]
+    None,
 }
 
 /// An entity index within the current [`TemplateContext`], which is defined by a scope
@@ -421,34 +428,42 @@ pub struct ScopedEntityIndex {
     pub index: usize,
 }
 
-impl Default for EntityReference {
-    fn default() -> Self {
-        Self::ScopedEntityIndex(ScopedEntityIndex { scope: 0, index: 0 })
+impl From<Entity> for EntityTemplate {
+    fn from(entity: Entity) -> Self {
+        Self::Entity(entity)
     }
 }
 
-impl Template for EntityReference {
+impl Template for EntityTemplate {
     type Output = Entity;
 
     fn build_template(&self, context: &mut TemplateContext) -> Result<Self::Output> {
         Ok(match self {
-            EntityReference::ScopedEntityIndex(scoped_entity_index) => {
+            Self::Entity(entity) => *entity,
+            Self::ScopedEntityIndex(scoped_entity_index) => {
                 context.get_scoped_entity(*scoped_entity_index)
+            }
+            Self::None => {
+                return Err(BevyError::error(
+                    "Failed to specify an entity for this EntityTemplate",
+                ))
             }
         })
     }
 
     fn clone_template(&self) -> Self {
         match self {
+            Self::Entity(entity) => Self::Entity(*entity),
             Self::ScopedEntityIndex(scoped_entity_index) => {
                 Self::ScopedEntityIndex(*scoped_entity_index)
             }
+            Self::None => Self::None,
         }
     }
 }
 
 impl FromTemplate for Entity {
-    type Template = EntityReference;
+    type Template = EntityTemplate;
 }
 
 /// A [`Template`] driven by a function that returns an output. This is used to create "free floating" templates without
