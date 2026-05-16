@@ -6,9 +6,10 @@ use bevy::{
         FeathersPlugins, constants::{fonts::{MONO, REGULAR}, icons, size::{MEDIUM_FONT, ROW_HEIGHT, SMALL_FONT}}, containers::{
             flex_spacer, group, group_body, group_header, pane, pane_body, pane_header,
             pane_header_divider, subpane, subpane_body, subpane_header,
-        }, controls::{
-            ButtonProps, ButtonVariant, CheckboxProps, ColorChannel, ColorPlane, ColorPlaneValue, ColorSlider, ColorSliderProps, ColorSwatch, ColorSwatchValue, MenuButtonProps, MenuItemProps, RadioProps, SliderBaseColor, SliderProps, TextInputProps, button, checkbox, color_plane, color_slider, color_swatch, disclosure_toggle, menu, menu_button, menu_divider, menu_item, menu_popup, radio, slider, text_input, text_input_container, toggle_switch, tool_button
-        }, cursor::{EntityCursor, OverrideCursor}, dark_theme::create_dark_theme, display::{icon, label, label_dim}, font_styles::InheritableFont, palette::GRAY_1, rounded_corners::RoundedCorners, theme::{ThemeBackgroundColor, ThemeBorderColor, ThemeFontColor, ThemedText, UiTheme}, tokens
+        }, 
+        containers::*,
+        controls::*, 
+        cursor::{EntityCursor, OverrideCursor}, dark_theme::create_dark_theme, display::{icon, label, label_dim}, font_styles::InheritableFont, palette::GRAY_1, rounded_corners::RoundedCorners, theme::{ThemeBackgroundColor, ThemeBorderColor, ThemeTextColor, ThemedText, UiTheme}, tokens
     }, prelude::*, scene::prelude::Scene, ui_widgets::Activate};
 mod cargo_env;
 use cargo_env::{CargoEnvPlugin, CargoEnv};
@@ -74,37 +75,37 @@ fn launcher_root() -> impl Scene {
                     column_gap: Val::Px(0.0),
                 }
                 Children [
-                   (:fake_pane_tab(ButtonProps {
+                   (:fake_pane_tab(FeathersButtonProps {
                     caption: Box::new(bsn_list!(
                         (Text("Projects") ThemedText),
                     )),
                     ..default()
                    })),
-                   (:inactive_tab(ButtonProps {
+                   (:inactive_tab(FeathersButtonProps {
                        caption: Box::new(bsn_list!(
                            (Text("Templates") ThemedText),
                        )),
                        ..default()
                    })),
-                   (:inactive_tab(ButtonProps {
+                   (:inactive_tab(FeathersButtonProps {
                        caption: Box::new(bsn_list!(
                            (Text("Installs") ThemedText),
                        )),
                        ..default()
                    })),
-                   (:inactive_tab(ButtonProps {
+                   (:inactive_tab(FeathersButtonProps {
                        caption: Box::new(bsn_list!(
                            (Text("Assets") ThemedText),
                        )),
                        ..default()
                    })),
-                   (:inactive_tab(ButtonProps {
+                   (:inactive_tab(FeathersButtonProps {
                        caption: Box::new(bsn_list!(
                            (Text("Learn") ThemedText),
                        )),
                        ..default()
                    })),
-                   (:inactive_tab(ButtonProps {
+                   (:inactive_tab(FeathersButtonProps {
                        caption: Box::new(bsn_list!(
                            (Text("Community") ThemedText),
                        )),
@@ -144,7 +145,7 @@ fn launcher_root() -> impl Scene {
                     font_size: SMALL_FONT,
                     weight: FontWeight::DEFAULT,
                 }
-                ThemeFontColor(tokens::TEXT_DIM)
+                ThemeTextColor(tokens::TEXT_DIM)
                 Children [
                     (
                         :external_link_bar
@@ -169,7 +170,7 @@ fn launcher_root() -> impl Scene {
 }
 
 
-fn fake_pane_tab(props: ButtonProps) -> impl Scene {
+fn fake_pane_tab(props: FeathersButtonProps) -> impl Scene {
     bsn!{
         Node { height: Val::Percent(100.0) }
         Children [
@@ -191,7 +192,7 @@ fn fake_pane_tab(props: ButtonProps) -> impl Scene {
                     align_items: AlignItems::Center,
                     padding: UiRect::axes(Val::Px(8.0), Val::Px(0.)),
                 }
-                ThemeFontColor(tokens::BUTTON_TEXT)
+                ThemeTextColor(tokens::BUTTON_TEXT)
                 InheritableFont {
                     font: REGULAR,
                     font_size: SMALL_FONT,
@@ -215,7 +216,7 @@ fn fake_pane_tab(props: ButtonProps) -> impl Scene {
     }
 }
 
-fn inactive_tab(props: ButtonProps) -> impl Scene {
+fn inactive_tab(props: FeathersButtonProps) -> impl Scene {
     bsn!{
         Node { 
             height: Val::Percent(100.0),
@@ -223,7 +224,7 @@ fn inactive_tab(props: ButtonProps) -> impl Scene {
             align_items: AlignItems::Center,
             padding: UiRect::axes(Val::Px(8.0), Val::Px(0.)),
         }
-        ThemeFontColor(tokens::TEXT_DIM)
+        ThemeTextColor(tokens::TEXT_DIM)
         InheritableFont {
             font: REGULAR,
             font_size: SMALL_FONT,
@@ -241,22 +242,19 @@ fn external_link_bar() -> impl Scene {
             
         }
         Children [
-            :tool_button(ButtonProps{
-                variant: ButtonVariant::Plain,
-                ..default()
-            }) Children [
+            :FeathersToolButton {
+                @variant: ButtonVariant::Plain,
+            } Children [
                 (Text("\u{00BD}") ThemedText)
             ],
-            :tool_button(ButtonProps{
-                variant: ButtonVariant::Plain,
-                ..default()
-            }) Children [
+            :FeathersToolButton {
+                @variant: ButtonVariant::Plain,
+            } Children [
                 (Text("\u{00BD}") ThemedText)
             ],
-            :tool_button(ButtonProps{
-                variant: ButtonVariant::Plain,
-                ..default()
-            }) Children [
+            :FeathersToolButton {
+                @variant: ButtonVariant::Plain,
+            } Children [
                 (Text("\u{00BD}") ThemedText)
             ],
         ]
