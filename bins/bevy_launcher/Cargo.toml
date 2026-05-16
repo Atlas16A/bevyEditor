@@ -10,6 +10,10 @@ keywords = ["bevy"]
 
 [dependencies]
 bevy = { path = "../../", version = "0.19.0-dev", features = ["experimental_bevy_feathers"] }
+bevy_scene = { path = "../../crates/bevy_scene", version = "0.19.0-dev" }
+
+#[dev-dependencies]
+#bevy_scene = { path = "../../crates/bevy_scene", version = "0.19.0-dev" }
 
 
 [features]

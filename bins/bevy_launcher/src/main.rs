@@ -10,6 +10,8 @@ use bevy::{
             ButtonProps, ButtonVariant, CheckboxProps, ColorChannel, ColorPlane, ColorPlaneValue, ColorSlider, ColorSliderProps, ColorSwatch, ColorSwatchValue, MenuButtonProps, MenuItemProps, RadioProps, SliderBaseColor, SliderProps, TextInputProps, button, checkbox, color_plane, color_slider, color_swatch, disclosure_toggle, menu, menu_button, menu_divider, menu_item, menu_popup, radio, slider, text_input, text_input_container, toggle_switch, tool_button
         }, cursor::{EntityCursor, OverrideCursor}, dark_theme::create_dark_theme, display::{icon, label, label_dim}, font_styles::InheritableFont, palette::GRAY_1, rounded_corners::RoundedCorners, theme::{ThemeBackgroundColor, ThemeBorderColor, ThemeFontColor, ThemedText, UiTheme}, tokens
     }, prelude::*, scene::prelude::Scene, ui_widgets::Activate};
+mod cargo_env;
+use cargo_env::{CargoEnvPlugin, CargoEnv};
 
 
 /// The internal Bevy Launcher plugin.
@@ -26,7 +28,7 @@ impl Plugin for LauncherInternalPlugin {
             ..default()
         }))
         .insert_resource(ClearColor(Color::oklch(0.2046, 0.0, 0.0)))
-        .add_plugins(FeathersPlugins).insert_resource(UiTheme(create_dark_theme())).add_systems(Startup, setup);
+        .add_plugins((FeathersPlugins, CargoEnvPlugin)).insert_resource(UiTheme(create_dark_theme())).add_systems(Startup, setup);
     }
 }
 
@@ -36,7 +38,8 @@ fn main() {
 
 fn setup(world: &mut World) -> Result {
     world.spawn_scene_list(bsn_list![Camera2d, launcher_root()])?;
-    println!("Bevy Launcher setup complete.");
+    let cargo_env = world.resource::<CargoEnv>();
+    println!("Bevy Launcher setup complete. Version: {}", cargo_env.cargo_pkg_version);
     Ok(())
 }
 
@@ -133,7 +136,33 @@ fn launcher_root() -> impl Scene {
                 Node {
                     width: Val::Percent(100.0),
                     height: Val::Px(24.0),
+                    justify_content: JustifyContent::SpaceBetween,
+                    align_items: AlignItems::Center,
                 }
+                InheritableFont {
+                    font: REGULAR,
+                    font_size: SMALL_FONT,
+                    weight: FontWeight::DEFAULT,
+                }
+                ThemeFontColor(tokens::TEXT_DIM)
+                Children [
+                    (
+                        :external_link_bar
+                    ),
+                    // Version
+                    (
+                        :version
+                    ),
+                    //Settings
+                    (
+                        Node {
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                        }
+                        Text("Settings") 
+                        ThemedText
+                    ),
+                ]
             )
         ]
     }
@@ -203,5 +232,44 @@ fn inactive_tab(props: ButtonProps) -> impl Scene {
         Children [
             {props.caption}
         ]
+    }
+}
+
+fn external_link_bar() -> impl Scene {
+    bsn!{
+        Node {
+            
+        }
+        Children [
+            :tool_button(ButtonProps{
+                variant: ButtonVariant::Plain,
+                ..default()
+            }) Children [
+                (Text("\u{00BD}") ThemedText)
+            ],
+            :tool_button(ButtonProps{
+                variant: ButtonVariant::Plain,
+                ..default()
+            }) Children [
+                (Text("\u{00BD}") ThemedText)
+            ],
+            :tool_button(ButtonProps{
+                variant: ButtonVariant::Plain,
+                ..default()
+            }) Children [
+                (Text("\u{00BD}") ThemedText)
+            ],
+        ]
+    }
+}
+
+fn version() -> impl Scene {
+    bsn!{
+        Node {
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+        }
+        Text({format!("V.{}", env!("CARGO_PKG_VERSION"))})
+        ThemedText
     }
 }
